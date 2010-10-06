@@ -1,0 +1,624 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 245, 41
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Imperial Alliance"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,7,20,20,SS_REALSIZEIMAGE
+    LTEXT           "Written by Tom ""Random Tiger"" Whittaker",IDC_STATIC,
+                    40,7,137,8
+    LTEXT           "Modified for use with Imperial Alliance",IDC_STATIC,40,
+                    18,118,8
+    DEFPUSHBUTTON   "OK",IDOK,188,7,50,14,WS_GROUP
+    LTEXT           "by Den Darkhill",IDC_STATIC,40,25,49,8
+END
+
+IDD_LAUNCHER_DIALOG DIALOGEX 0, 0, 210, 266
+STYLE DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Imperial Alliance Launcher"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "&Browse",IDC_BROWSE,162,0,36,14,NOT WS_VISIBLE
+    EDITTEXT        IDC_PATH,7,5,154,15,ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_VISIBLE
+    CONTROL         "Tab1",IDC_HOLDER,"SysTabControl32",TCS_MULTILINE,0,5,
+                    210,225
+    PUSHBUTTON      "&Run",IDC_RUN,10,235,45,14,WS_DISABLED
+    DEFPUSHBUTTON   "&OK",IDOK,58,235,45,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,106,235,45,14
+    PUSHBUTTON      "&Apply",IDC_APPLY,154,235,45,14
+    CTEXT           "E-mail any launcher problems to den.darkhill@gmail.com",
+                    IDC_STATIC,10,255,192,8
+    GROUPBOX        "",IDC_DLG_HOLDER,5,30,200,195
+END
+
+IDD_SOUND_ORIGINAL DIALOG DISCARDABLE  0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Sound",IDC_STATIC,7,7,187,79
+    LTEXT           "Currently selected Sound Card",IDC_STATIC,15,20,130,8
+    COMBOBOX        IDC_SOUND_CARD,15,31,173,50,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Only select EAX or A3D if your card supports it",
+                    IDC_STATIC,15,49,173,8
+    GROUPBOX        "Joystick",IDC_STATIC,7,91,187,99
+    COMBOBOX        IDC_JOYSTICK,15,105,173,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Enable Force Feedback",IDC_FORCE_FREEDBACK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,134,108,10
+    CONTROL         "Enable Directional Hit (Force Feedback)",IDC_DIR_HIT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,148,155,10
+    PUSHBUTTON      "Calibrate",IDC_CALIBRATE,15,169,173,14
+    PUSHBUTTON      "Background Audio",IDC_BACKGROUND_AUDIO,100,65,70,15
+END
+
+IDD_JOYSTICK DIALOG DISCARDABLE  0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Joystick",-1,7,7,187,99
+    COMBOBOX        IDC_JOYSTICK,15,20,173,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Enable Force Feedback",IDC_FORCE_FREEDBACK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,50,108,10
+    CONTROL         "Enable Directional Hit (Force Feedback)",IDC_DIR_HIT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,64,155,10
+    PUSHBUTTON      "Calibrate",IDC_CALIBRATE,15,85,173,14
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "Emperor's Hammer Works\0"
+            VALUE "FileDescription", "Imperial Alliance Launcher\0"
+            VALUE "FileVersion", "1.0\0"
+            VALUE "InternalName", "IA\0"
+            VALUE "LegalCopyright", "Copyright (C) 2004\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "IA.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Imperial Alliance Launcher \0"
+            VALUE "ProductVersion", "1.0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 238
+        VERTGUIDE, 43
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 34
+    END
+
+    IDD_LAUNCHER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        VERTGUIDE, 7
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 263
+    END
+
+    IDD_SOUND_ORIGINAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        VERTGUIDE, 15
+        VERTGUIDE, 188
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
+    END
+
+    IDD_JOYSTICK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        VERTGUIDE, 15
+        VERTGUIDE, 188
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP  DISCARDABLE     "banner.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "RES\\app_icon.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About Launcher..."
+    IDS_1ST_TAB             "Welcome"
+    IDS_2ND_TAB             "Flags"
+    IDS_3RD_TAB             "Video"
+    IDS_4TH_TAB             "Sound"
+    IDS_5TH_TAB             "Speech"
+    IDS_6TH_TAB             "Network"
+    IDS_7TH_TAB             "Joystick"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_COMM_LINE DIALOG DISCARDABLE  0, 0, 200, 200
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Custom flags",IDC_STATIC,7,58,41,8
+    EDITTEXT        IDC_CUSTOM_PARAM,57,55,136,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_COMM_LINE_PATH,7,4,186,28,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    CONTROL         "Use flags when running Imperial Alliance directly",
+                    IDC_USE_FLAGS_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,187,186,10
+    CONTROL         "List1",IDC_FLAG_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_NOLABELWRAP | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,7,74,186,107
+    CONTROL         "Help",IDC_FLAG_HELP,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_TABSTOP,162,187,31,10
+    COMBOBOX        IDC_FLAG_SETUP,57,36,136,102,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Easy setup",IDC_STATIC,7,39,36,8
+END
+
+IDD_REG_OPTIONS DIALOG DISCARDABLE  0, 0, 198, 200
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "Editing directly changes your registry and may cause freespace or fs2_open to become unstable.",
+                    IDC_STATIC,7,4,186,17,NOT WS_VISIBLE
+    LTEXT           "Location",IDC_STATIC,7,7,27,8
+    EDITTEXT        IDC_REG_LOCATION,44,4,149,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "Set",IDC_SET,7,50,34,14,NOT WS_VISIBLE | WS_DISABLED
+    EDITTEXT        IDC_NEW_VALUE,44,50,149,14,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    CONTROL         "List3",IDC_REG_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_AUTOARRANGE | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,7,25,186,168
+END
+
+IDD_VIDEO DIALOG DISCARDABLE  0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Graphics API",IDC_STATIC,7,6,40,8
+    COMBOBOX        IDC_GFXAPI_LIST,66,4,128,82,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    LTEXT           "",IDC_API_HOLDER,7,20,188,113
+    GROUPBOX        "General settings (Recommend Highest)",IDC_STATIC,7,133,
+                    188,59
+    COMBOBOX        IDC_SETTINGS_LIST,14,145,173,54,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Hi res pack (sparky_hi_fs2.vp) installed",
+                    IDC_HI_SPARKY_CHECKBOX,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_DISABLED | WS_TABSTOP,13,164,142,10
+    CONTROL         "Use large textures",IDC_LTXT_CHECKBOX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,177,70,10
+    CONTROL         "Fix GeForce font problem",IDC_GF4_FFIX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,91,177,95,10
+END
+
+IDD_NETWORK DIALOG DISCARDABLE  0, 0, 201, 198
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Internet Connection",IDC_STATIC,7,7,187,49
+    CONTROL         "None",IDC_NET_TYPE_1,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,17,18,95,10
+    CONTROL         "Dialup Networking",IDC_NET_TYPE_2,"Button",
+                    BS_AUTORADIOBUTTON,17,29,111,10
+    CONTROL         "LAN/Direct Connection (and AOL)",IDC_NET_TYPE_3,"Button",
+                    BS_AUTORADIOBUTTON,17,40,167,10
+    GROUPBOX        "Connection Speed",IDC_STATIC,7,60,187,91
+    CONTROL         "None Specified",IDC_CONSPEED_1,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,17,74,120,10
+    CONTROL         "Slower than 56K Modem",IDC_CONSPEED_2,"Button",
+                    BS_AUTORADIOBUTTON,17,86,138,10
+    CONTROL         "56K Modem",IDC_CONSPEED_3,"Button",BS_AUTORADIOBUTTON,
+                    17,98,110,10
+    CONTROL         "Single Channel ISDN",IDC_CONSPEED_4,"Button",
+                    BS_AUTORADIOBUTTON,17,110,128,10
+    CONTROL         "Dual Channel ISDN, Cable Modems",IDC_CONSPEED_5,"Button",
+                    BS_AUTORADIOBUTTON,17,122,146,10
+    CONTROL         "T1, ADSL, T3, etc",IDC_CONSPEED_6,"Button",
+                    BS_AUTORADIOBUTTON,17,134,107,10
+    GROUPBOX        "Misc",IDC_STATIC,7,154,187,37
+    LTEXT           "Force local port",IDC_STATIC,17,170,68,8
+    EDITTEXT        IDC_LOCAL_PORT,97,167,59,14,ES_AUTOHSCROLL
+END
+
+IDD_SOUND DIALOG DISCARDABLE  0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Sound",IDC_STATIC,7,7,187,79
+    LTEXT           "Currently selected Sound Card",IDC_STATIC,15,20,130,8
+    COMBOBOX        IDC_SOUND_CARD,15,31,173,50,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Only select EAX or A3D if your card supports it",
+                    IDC_STATIC,15,49,173,8
+    PUSHBUTTON      "Create Playlist",IDC_CREATE_PLAYLIST,118,148,70,15
+    GROUPBOX        "Jukebox",IDC_STATIC,7,95,187,84
+    LTEXT           "Play Mode:",IDC_STATIC,15,106,54,9
+    CONTROL         "CD Audio",IDC_CD,"Button",BS_AUTORADIOBUTTON,15,116,48,
+                    11
+    CONTROL         "Ogg Vorbis",IDC_OGG,"Button",BS_AUTORADIOBUTTON,15,127,
+                    48,11
+    CONTROL         "Randomize Playback",IDC_RANDOMIZE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,153,80,10
+    COMBOBOX        IDC_CDROM_DRIVE,154,119,34,71,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Choose CDROM to play from:",IDC_STATIC,95,107,93,8
+END
+
+IDD_DX8 DIALOG DISCARDABLE  0, 0, 187, 109
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Adapter",IDC_STATIC,0,2,25,8
+    COMBOBOX        IDC_ADAPTER_LIST,59,0,128,112,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Resolution",IDC_STATIC,0,18,33,8
+    COMBOBOX        IDC_RES_LIST,59,16,128,96,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Antialiasing",IDC_STATIC,0,34,36,8
+    COMBOBOX        IDC_ANTIALIAS_LIST,59,32,128,64,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Allow non standard modes",IDC_ALLOW_NON_SMODES,"Button",
+                    BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,59,49,99,
+                    10
+    PUSHBUTTON      "Save Text Caps",IDC_GEN_CAPS,0,92,64,14,NOT WS_VISIBLE
+    LTEXT           "When reporting a D3D bug please save a text cap file send that as well",
+                    IDC_STATIC,71,90,116,18,NOT WS_VISIBLE
+END
+
+IDD_OGL DIALOG DISCARDABLE  0, 0, 187, 144
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Mode",IDC_STATIC,0,2,19,8
+    COMBOBOX        IDC_OGL_RES,59,0,128,112,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Allow non standard modes",IDC_ALLOW_NON_SMODES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,60,18,99,10
+END
+
+IDD_DX5 DIALOG DISCARDABLE  0, 0, 187, 144
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Mode",IDC_STATIC,0,2,19,8
+    COMBOBOX        IDC_DX5_RES,59,0,128,70,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_3DFX DIALOG DISCARDABLE  0, 0, 187, 144
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Mode",IDC_STATIC,0,2,19,8
+    COMBOBOX        IDC_GLIDE_RES,59,0,128,70,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Note these settings will only work if your graphics card supports glide",
+                    IDC_STATIC,0,16,182,29
+END
+
+IDD_SPEECH DIALOG DISCARDABLE  0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Speech",IDC_STATIC,7,7,187,184
+    EDITTEXT        IDC_EDIT,15,18,171,39,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    WS_VSCROLL
+    COMBOBOX        IDC_VOICE_COMBO,15,63,115,91,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Play",IDC_PLAY,136,62,50,14
+    LTEXT           "Volume",IDC_STATIC,88,80,24,8
+    CONTROL         "Slider1",IDC_VOLUME_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,15,89,171,15
+    LTEXT           "Use Simulated speech in:",IDC_STATIC,15,111,81,8
+    CONTROL         "Techroom",IDC_SPEECH_TECHROOM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,122,47,10
+    CONTROL         "Briefings",IDC_SPEECH_BRIEFINGS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,132,42,10
+    CONTROL         "Ingame",IDC_SPEECH_INGAME,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,142,39,10
+    LTEXT           "Additional voices, Microsoft Mike and Mary can be installed for Win2000 and XP.",
+                    IDC_STATIC,15,168,171,19
+    PUSHBUTTON      "Get Aditional Voices",IDC_GET_VOICES,107,148,79,14
+END
+
+IDD_HELP DIALOGEX 0, 0, 201, 199
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CTEXT           "Welcome to Imperial Alliance",IDC_STATIC,4,4,193,8
+    LTEXT           "This program will allow you to setup your Imperial Alliance video, sound/joystick, and network options.",
+                    IDC_STATIC,4,20,193,17
+    LTEXT           "This launcher would not be possible without the help of Tom ""Random Tiger"" Whittaker or the rest of the FS2 Open development team.",
+                    IDC_STATIC,4,161,193,25
+    CONTROL         151,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,16,
+                    47,167,76
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_COMM_LINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 193
+        VERTGUIDE, 57
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 193
+        HORZGUIDE, 22
+    END
+
+    IDD_REG_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 193
+        VERTGUIDE, 44
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 193
+        HORZGUIDE, 25
+    END
+
+    IDD_VIDEO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 195
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 197
+    END
+
+    IDD_NETWORK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        VERTGUIDE, 17
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 191
+    END
+
+    IDD_SOUND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        VERTGUIDE, 15
+        VERTGUIDE, 188
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
+    END
+
+    IDD_OGL, DIALOG
+    BEGIN
+        VERTGUIDE, 60
+        BOTTOMMARGIN, 112
+    END
+
+    IDD_DX5, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 112
+    END
+
+    IDD_3DFX, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 112
+    END
+
+    IDD_SPEECH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        VERTGUIDE, 15
+        VERTGUIDE, 186
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 191
+    END
+
+    IDD_HELP, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 198
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 193
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\Launcher.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_VIDEO DLGINIT
+BEGIN
+    IDC_SETTINGS_LIST, 0x403, 8, 0
+0x2e34, 0x4820, 0x6769, 0x0068, 
+    IDC_SETTINGS_LIST, 0x403, 10, 0
+0x2e33, 0x4d20, 0x6465, 0x7569, 0x006d, 
+    IDC_SETTINGS_LIST, 0x403, 7, 0
+0x2e32, 0x4c20, 0x776f, "\000" 
+    IDC_SETTINGS_LIST, 0x403, 10, 0
+0x2e31, 0x4c20, 0x776f, 0x7365, 0x0074, 
+    0
+END
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\Launcher.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

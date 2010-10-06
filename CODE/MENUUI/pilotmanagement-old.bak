@@ -1,0 +1,755 @@
+#include "globalincs/pstypes.h"
+#include "menuui/barracks.h"
+#include "playerman/managepilot.h"
+#include "ui/ui.h"
+#include "graphics/font.h"
+#include "io/key.h"
+#include "gamesnd/gamesnd.h"
+#include "osapi/osapi.h"
+#include "popup/popup.h"
+#include "menuui/playermenu.h"
+#include "gamesequence/gamesequence.h"
+#include "gamehelp/contexthelp.h"
+#include "graphics/2d.h"
+#include "ctype.h"
+#include "freespace2/freespace.h"
+#include "globalincs/systemvars.h"
+#include "bmpman/bmpman.h"
+#include "io/mouse.h"
+#include "osapi/osregistry.h"
+#include "globalincs/alphacolors.h"
+#include "debugconsole/dbugfile.h"
+
+/*#define PM_NUM_BUTTONS					10
+#define PM_NUM_TEXT						4
+
+#define PM_UP_BUTTON					0
+#define PM_DOWN_BUTTON					1
+#define PM_SINGLE_MODE_BUTTON			2
+#define PM_MULTI_MODE_BUTTON			3
+#define PM_ACTIVE_BUTTON				4
+#define PM_CREATE_BUTTON				5	
+#define PM_CLONE_BUTTON					6		
+#define PM_DELETE_BUTTON				7	
+#define PM_CONVERT_BUTTON				8
+#define PM_EXIT_BUTTON					9*/
+
+extern void barracks_init_stats(scoring_struct *stats);
+extern void barracks_set_hotkeys(bool pilot_text_enter_mode);
+
+extern int barracks_new_pilot_selected(void);
+extern void barracks_set_callsign_enter_mode(bool set_callsign_enter_mode);
+extern void barracks_create_new_pilot(void);
+extern int barracks_pilot_accepted(void);
+
+extern void barracks_scroll_stats_up(void);
+extern void barracks_scroll_stats_down(void);
+extern void barracks_prev_pic(void);
+extern void barracks_next_pic(void);
+extern void barracks_prev_squad_pic(void);
+extern void barracks_next_squad_pic(void);
+extern void barracks_delete_pilot(void);
+extern int barracks_pilot_filter(char *filename);
+extern void barracks_squad_change_popup(void);
+void barracks_init_player_stuff(int mode);
+extern void barracks_display_pilot_callsigns(int prospective_pilot);
+extern void barracks_set_callsign_enter_mode(bool set_callsign_enter_mode);
+extern void barracks_strip_pcx(char *str);
+extern void barracks_scroll_callsign_up(void);
+extern void barracks_scroll_callsign_down(void);
+extern void barracks_create_new_pilot(UI_INPUTBOX *Inputbox);
+extern void barracks_set_callsign_enter_mode(bool set_callsign_enter_mode);
+extern void barracks_accept_new_pilot_callsign();
+
+//Returns 0 on failure, 1 on success
+int delete_pilot_file( char *pilot_name, int single );
+
+// stats defines
+#define NUM_STAT_LINES (21 + MAX_SHIP_TYPES)	// Goober5000
+#define STAT_COLUMN1_W 40
+#define STAT_COLUMN2_W 10
+
+static int Stat_column1_w[GR_NUM_RESOLUTIONS] =
+{
+	40,		// GR_640
+	40			// GR_1024
+};
+
+static int Stat_column2_w[GR_NUM_RESOLUTIONS] =
+{
+	10,		// GR_640
+	10			// GR_1024
+};
+
+static int Barracks_stats_coords[GR_NUM_RESOLUTIONS][4] = {
+	{ // GR_640
+		32, 212, 240, 250
+	},
+	{ // GR_1024
+		42, 351, 240, 400
+	}
+};
+
+static int Barracks_stats2_coords[GR_NUM_RESOLUTIONS][3] = {
+	{ // GR_640
+		276, 212, 81		// X2, , W2
+	},
+	{ // GR_1024
+		286, 351, 81		// X2, , W2
+	}
+};
+
+// constants for coordinate lookup
+#define BARRACKS_X_COORD 0
+#define BARRACKS_Y_COORD 1
+#define BARRACKS_W_COORD 2
+#define BARRACKS_H_COORD 3
+
+// pilot selection field
+static int Barracks_list_coords[GR_NUM_RESOLUTIONS][4] = {
+	{ // GR_640
+		378, 50, 360, 240
+	},
+	{ // GR_1024
+		45, 51, 646, 144
+	}
+};
+
+static char *PilotManage_bitmap_fname[GR_NUM_RESOLUTIONS] = {
+	"PilotMan",
+	"2_PilotMan"
+};
+
+static char *PilotManage_bitmap_mask_fname[GR_NUM_RESOLUTIONS] = {
+	"PilotMan-M",
+	"2_PilotMan-M"
+};
+
+static int Num_stat_lines;
+static char Stat_labels[NUM_STAT_LINES][STAT_COLUMN1_W];
+static char Stats[NUM_STAT_LINES][STAT_COLUMN2_W];
+
+extern int Player_sel_mode;
+
+static int Num_pilots;
+static int Selected_line;
+static int List_scroll_offset;
+static int Stats_scroll_offset;
+static char Pilots_arr[MAX_PILOTS][MAX_FILENAME_LEN];
+static char *Pilots[MAX_PILOTS];
+static int Pilot_ranks[MAX_PILOTS];
+static int Pilot_images[MAX_PILOT_IMAGES];
+static UI_WINDOW Ui_window;
+static UI_BUTTON List_region;
+static UI_INPUTBOX Inputbox;
+static int Background_bitmap = -1;
+static int Rank_pips_bitmaps;
+static int Rank_pips_count;
+static int Pic_number;
+static int Pic_squad_number;
+static int Clone_flag;
+static player *Cur_pilot;
+static bool Barracks_callsign_enter_mode;
+
+struct pilot_manage_buttons {
+	char *filename;
+	int x, y;
+	int text_x, text_y;	// this is where the text label is
+	int hotspot;
+	int repeat;
+	UI_BUTTON button;  // because we have a class inside this struct, we need the constructor below..
+
+	pilot_manage_buttons(char *name, int x1, int y1, int x2, int y2, int h, int r = 0) : filename(name), x(x1), y(y1), text_x(x2), text_y(y2), hotspot(h), repeat(r) {}
+};
+
+static pilot_manage_buttons Buttons[GR_NUM_RESOLUTIONS][PM_NUM_BUTTONS] = {
+	{
+		pilot_manage_buttons("PMB_00", 208, 298,	11,		157,	0),		
+		pilot_manage_buttons("PMB_01", 291, 298,	0,		0,		1),
+		pilot_manage_buttons("PMB_02", 375, 298,	0,		0,		2),
+		pilot_manage_buttons("PMB_03", 458, 298,	0,		0,		3),
+		pilot_manage_buttons("PMB_04", 191, 350,	0,		0,		4),
+		pilot_manage_buttons("PMB_05", 321, 354,	0,		0,		5),
+		pilot_manage_buttons("PMB_06", 386, 354,	0,		0,		6),
+		pilot_manage_buttons("PMB_07", 452, 354,	0,		0,		7),
+		pilot_manage_buttons("PMB_08", 518, 354,	0,		0,		8),
+		pilot_manage_buttons("PMB_09", 228, 407,	0,		0,		9),
+	},
+	{
+		pilot_manage_buttons("PMB_00", 208, 298,	11,		157,	0),		
+		pilot_manage_buttons("PMB_01", 291, 298,	0,		0,		1),
+		pilot_manage_buttons("PMB_02", 375, 298,	0,		0,		2),
+		pilot_manage_buttons("PMB_03", 458, 298,	0,		0,		3),
+		pilot_manage_buttons("PMB_04", 191, 350,	0,		0,		4),
+		pilot_manage_buttons("PMB_05", 321, 354,	0,		0,		5),
+		pilot_manage_buttons("PMB_06", 386, 354,	0,		0,		6),
+		pilot_manage_buttons("PMB_07", 452, 354,	0,		0,		7),
+		pilot_manage_buttons("PMB_08", 518, 354,	0,		0,		8),
+		pilot_manage_buttons("PMB_09", 228, 407,	0,		0,		9),
+	}
+};
+
+
+void pilot_manage_button_pressed(int n)
+{
+	switch (n) {
+		case PM_UP_BUTTON:
+			barracks_scroll_callsign_up();
+			break;
+		
+		case PM_DOWN_BUTTON:
+			barracks_scroll_callsign_down();
+			break;
+
+		case PM_CLONE_BUTTON:
+			Clone_flag = 1;
+			barracks_create_new_pilot(&Inputbox);
+			break;
+		
+		case PM_CREATE_BUTTON:
+			Clone_flag = 0;
+			barracks_create_new_pilot(&Inputbox);
+			break;
+		case PM_EXIT_BUTTON:
+			gameseq_post_event(GS_EVENT_BARRACKS_MENU);
+			break;
+		case PM_ACTIVE_BUTTON:
+			if (barracks_new_pilot_selected()){
+				gamesnd_play_iface(SND_GENERAL_FAIL);
+				
+				// throw up a popup telling the player that he should create a pilot first
+				if(Player_sel_mode == PLAYER_SELECT_MODE_SINGLE){
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a single player pilot.", 66));
+				} else {
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a multi player pilot.", 67));
+				}
+			} else {
+				gamesnd_play_iface(SND_SCROLL);
+			}
+			break;
+
+	} /*
+		case B_STATS_SCROLL_UP_BUTTON:
+			gamesnd_play_iface(SND_SWITCH_SCREENS);
+			gameseq_post_event(GS_EVENT_PILOT_INFO);
+			//barracks_scroll_stats_up();
+			break;
+
+		case B_STATS_SCROLL_DOWN_BUTTON:
+			gamesnd_play_iface(SND_SWITCH_SCREENS);
+			gameseq_post_event(GS_EVENT_PILOT_MANAGE);
+			//barracks_scroll_stats_down();
+			break;
+
+		case B_PIC_PREV_PILOT_BUTTON:
+			barracks_prev_pic();
+			break;
+
+		case B_PIC_NEXT_PILOT_BUTTON:
+			barracks_next_pic();
+			break;
+
+		case B_SQUAD_PREV_BUTTON:
+			barracks_prev_squad_pic();
+			break;
+
+		case B_SQUAD_NEXT_BUTTON:
+			barracks_next_squad_pic();
+			break;
+
+		case B_PILOT_SET_ACTIVE_BUTTON:
+			if (barracks_new_pilot_selected()){
+				gamesnd_play_iface(SND_GENERAL_FAIL);
+				
+				// throw up a popup telling the player that he should create a pilot first
+				if(Player_sel_mode == PLAYER_SELECT_MODE_SINGLE){
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a single player pilot.", 66));
+				} else {
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a multi player pilot.", 67));
+				}
+			} else {
+				gamesnd_play_iface(SND_SCROLL);
+			}
+			break;
+
+		case B_ACCEPT_BUTTON:			
+			if (Num_pilots && !barracks_pilot_accepted()) {
+				gamesnd_play_iface(SND_COMMIT_PRESSED);
+				gameseq_post_event(GS_EVENT_MAIN_MENU);
+			} else {
+				gamesnd_play_iface(SND_GENERAL_FAIL);
+
+				// throw up a popup telling the player that he should create a pilot first
+				if(Player_sel_mode == PLAYER_SELECT_MODE_SINGLE){
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a single player pilot.", 66));
+				} else {
+					popup(PF_USE_AFFIRMATIVE_ICON,1,POPUP_OK,XSTR( "You must create a multi player pilot.", 67));
+				}
+			}
+			break;
+
+		case B_PILOT_CLONE_BUTTON:
+			if (Num_pilots < 1) {
+				gamesnd_play_error_beep();
+				break;
+			}
+
+			Clone_flag = 1;
+			barracks_create_new_pilot();
+			break;
+
+		case B_PILOT_CONVERT_BUTTON: {
+#if defined(DEMO) || defined(OEM_BUILD)
+			game_feature_not_in_demo_popup();
+#else
+			char temp[256], *str;
+			char old_pic[256] = "";
+			char old_squad_pic[256] = "";
+			char old_squad[256] = "";
+			int z;
+
+			if (!barracks_new_pilot_selected()) {
+				if (Player_sel_mode == PLAYER_SELECT_MODE_SINGLE)
+					str = XSTR( "multiplayer", 68);
+				else
+					str = XSTR( "single player", 69);
+
+				sprintf(temp, XSTR( "This will overwrite your %s pilot.  Proceed?", 70), str);
+				if (!verify_pilot_file(Cur_pilot->callsign, Player_sel_mode == PLAYER_SELECT_MODE_MULTI)) {
+					z = popup(0, 2, POPUP_CANCEL, POPUP_OK, temp);
+					if (z != 1)
+						break;
+				}
+
+				strcpy(old_pic, Cur_pilot->image_filename);
+				strcpy(old_squad_pic, Cur_pilot->squad_filename);
+				strcpy(old_squad, Cur_pilot->squad_name);
+				init_new_pilot(Cur_pilot, 0);
+				strcpy(Cur_pilot->image_filename, old_pic);
+				strcpy(Cur_pilot->squad_filename, old_squad_pic);
+				strcpy(Cur_pilot->squad_name, old_squad);
+				if (Player_sel_mode == PLAYER_SELECT_MODE_SINGLE) {
+					Cur_pilot->flags |= PLAYER_FLAGS_IS_MULTI;
+					write_pilot_file();
+					barracks_init_player_stuff(PLAYER_SELECT_MODE_MULTI);
+
+				} else {
+					write_pilot_file();
+					barracks_init_player_stuff(PLAYER_SELECT_MODE_SINGLE);
+				}
+
+				gamesnd_play_iface(SND_USER_SELECT);
+
+			} else {
+				gamesnd_play_iface(SND_GENERAL_FAIL);
+			}
+#endif
+			break;
+		}
+
+		case B_PILOT_CREATE_BOTTON:
+			Clone_flag = 0;
+			barracks_create_new_pilot();
+			break;
+
+		case B_HELP_BUTTON:
+			launch_context_help();
+			gamesnd_play_iface(SND_HELP_PRESSED);
+			break;
+
+		case B_OPTION_BUTTON:
+			gamesnd_play_iface(SND_SWITCH_SCREENS);
+			gameseq_post_event(GS_EVENT_OPTIONS_MENU);
+			break;
+
+		case B_STATS_MEDAL_BUTTON:
+#ifdef FS2_DEMO
+			game_feature_not_in_demo_popup();
+#else
+			gamesnd_play_iface(SND_SWITCH_SCREENS);
+			//gameseq_post_event(GS_EVENT_PILOT_INFO);
+			gameseq_post_event(GS_EVENT_VIEW_MEDALS);
+#endif
+			break;
+
+		case B_PILOT_DELETE_BUTTON:
+			barracks_delete_pilot();
+			break;
+
+		case B_PILOT_SINGLE_MODE_BUTTON:
+			if (Player_sel_mode != PLAYER_SELECT_MODE_SINGLE) {
+				gamesnd_play_iface(SND_USER_SELECT);
+				barracks_init_player_stuff(PLAYER_SELECT_MODE_SINGLE);
+			}						
+			break;
+
+		case B_PILOT_MULTI_MODE_BUTTON:
+#if defined(DEMO) || defined(OEM_BUILD) // not for FS2_DEMO
+			game_feature_not_in_demo_popup();
+#else
+			if (Player_sel_mode != PLAYER_SELECT_MODE_MULTI) {
+				gamesnd_play_iface(SND_USER_SELECT);
+				barracks_init_player_stuff(PLAYER_SELECT_MODE_MULTI);
+			}
+#endif
+			break;
+	}*/
+}
+
+
+void pilot_manage_init()
+{
+	barracks_close();
+	
+	UI_WINDOW *w = &Ui_window;
+	scoring_struct *Player_score=NULL;
+	
+	// save current pilot file, so we don't possibly loose it.
+	write_pilot_file();
+
+	// create interface
+	Ui_window.create(0, 0, gr_screen.max_w, gr_screen.max_h, 0);
+	Ui_window.set_mask_bmap(PilotManage_bitmap_mask_fname[gr_screen.res]);
+
+	// load background bitmap
+	Background_bitmap = bm_load(PilotManage_bitmap_fname[gr_screen.res]);
+	if(Background_bitmap < 0){
+		// we failed to load the bitmap - this is very bad
+		Int3();
+	}
+
+	// create buttons
+	int i;
+	for (i=0; i<PM_NUM_BUTTONS; i++) {
+		// create the object
+		Buttons[gr_screen.res][i].button.create(&Ui_window, "", Buttons[gr_screen.res][i].x, Buttons[gr_screen.res][i].y, 60, 30, Buttons[gr_screen.res][i].repeat, 1);
+
+		// set the sound to play when highlighted
+		Buttons[gr_screen.res][i].button.set_highlight_action(common_play_highlight_sound);
+
+		// set the ani for the button
+		Buttons[gr_screen.res][i].button.set_bmaps(Buttons[gr_screen.res][i].filename);
+
+		// set the hotspot
+		Buttons[gr_screen.res][i].button.link_hotspot(Buttons[gr_screen.res][i].hotspot);
+	}
+
+	// add all strings	
+	/*w->add_XSTR("Create", 1034, Buttons[gr_screen.res][0].text_x,  Buttons[gr_screen.res][0].text_y, &Buttons[gr_screen.res][0].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Accept", 1035, Buttons[gr_screen.res][5].text_x,  Buttons[gr_screen.res][5].text_y, &Buttons[gr_screen.res][5].button, UI_XSTR_COLOR_PINK);
+	w->add_XSTR("Help",   928, Buttons[gr_screen.res][6].text_x,  Buttons[gr_screen.res][6].text_y, &Buttons[gr_screen.res][6].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Options",1036, Buttons[gr_screen.res][7].text_x,  Buttons[gr_screen.res][7].text_y, &Buttons[gr_screen.res][7].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Medals", 1037, Buttons[gr_screen.res][8].text_x,  Buttons[gr_screen.res][8].text_y, &Buttons[gr_screen.res][8].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Remove", 1038, Buttons[gr_screen.res][11].text_x,  Buttons[gr_screen.res][11].text_y, &Buttons[gr_screen.res][11].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Select", 1552, Buttons[gr_screen.res][12].text_x,  Buttons[gr_screen.res][12].text_y, &Buttons[gr_screen.res][12].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Clone",  1040, Buttons[gr_screen.res][13].text_x,  Buttons[gr_screen.res][13].text_y, &Buttons[gr_screen.res][13].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Single", 1041, Buttons[gr_screen.res][14].text_x,  Buttons[gr_screen.res][14].text_y,  &Buttons[gr_screen.res][14].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Multi",  1042, Buttons[gr_screen.res][15].text_x,  Buttons[gr_screen.res][15].text_y,  &Buttons[gr_screen.res][15].button, UI_XSTR_COLOR_GREEN);
+	w->add_XSTR("Convert",1043, Buttons[gr_screen.res][16].text_x,  Buttons[gr_screen.res][16].text_y, &Buttons[gr_screen.res][16].button, UI_XSTR_COLOR_GREEN);	
+	for(i=0; i<BARRACKS_NUM_TEXT; i++) {
+		w->add_XSTR(&Barracks_text[gr_screen.res][i]);
+	}*/
+
+	// button for selecting pilot
+	List_region.create(&Ui_window, "", Barracks_list_coords[gr_screen.res][BARRACKS_X_COORD], Barracks_list_coords[gr_screen.res][BARRACKS_Y_COORD], Barracks_list_coords[gr_screen.res][BARRACKS_W_COORD], Barracks_list_coords[gr_screen.res][BARRACKS_H_COORD], 0, 1);
+	List_region.hide();
+
+	// create input box (for new pilot)
+	Inputbox.create(&Ui_window, Barracks_list_coords[gr_screen.res][BARRACKS_X_COORD], Barracks_list_coords[gr_screen.res][BARRACKS_Y_COORD], Barracks_list_coords[gr_screen.res][BARRACKS_W_COORD], CALLSIGN_LEN - 1, "", UI_INPUTBOX_FLAG_INVIS | UI_INPUTBOX_FLAG_KEYTHRU | UI_INPUTBOX_FLAG_LETTER_FIRST);
+	Inputbox.set_valid_chars(VALID_PILOT_CHARS);
+	//Inputbox.disable();
+	//Inputbox.hide();
+
+	// load in help overlay bitmap	
+	help_overlay_load(BARRACKS_OVERLAY);
+	help_overlay_set_state(BARRACKS_OVERLAY,0);	
+
+	// other init stuff
+	Barracks_callsign_enter_mode = 0;	
+	List_scroll_offset = Stats_scroll_offset = Pic_number = Pic_squad_number = Selected_line = 0;
+	Cur_pilot = &Players[Player_num];
+
+	// disable squad logo selection buttons in single player
+/*	if(!(Cur_pilot->flags & PLAYER_FLAGS_IS_MULTI)){
+		// squad logo picture buttons		
+		Buttons[gr_screen.res][B_SQUAD_PREV_BUTTON].button.hide();
+		Buttons[gr_screen.res][B_SQUAD_PREV_BUTTON].button.disable();
+		Buttons[gr_screen.res][B_SQUAD_NEXT_BUTTON].button.hide();
+		Buttons[gr_screen.res][B_SQUAD_NEXT_BUTTON].button.disable();
+	} else {
+		// squad logo picture buttons		
+		Buttons[gr_screen.res][B_SQUAD_PREV_BUTTON].button.enable();
+		Buttons[gr_screen.res][B_SQUAD_PREV_BUTTON].button.unhide();
+		Buttons[gr_screen.res][B_SQUAD_NEXT_BUTTON].button.enable();
+		Buttons[gr_screen.res][B_SQUAD_NEXT_BUTTON].button.unhide();		
+	}*/
+
+	// set up hotkeys for buttons so we draw the correct animation frame when a key is pressed
+	barracks_set_hotkeys(1);
+
+	// load ramp pips
+	Rank_pips_bitmaps = bm_load_animation("IconRankMini.ani", &Rank_pips_count);	
+
+	// load up the pilot pic list
+	pilot_load_pic_list();	
+	pilot_load_squad_pic_list();
+	
+	// don't load pilot images yet
+	//for (i=0; i<MAX_PILOT_IMAGES; i++) {
+	//	Pilot_images[i] = BARRACKS_IMAGE_NOT_LOADED;  // while -1 is can't load
+	//	Pilot_squad_images[i] = BARRACKS_IMAGE_NOT_LOADED;
+	//}
+	
+	// init stats
+	barracks_init_stats(&Cur_pilot->stats);
+
+	// disable some buttons for the multiplayer beta and e3 build
+#if defined(MULTIPLAYER_BETA_BUILD) || defined(E3_BUILD) || defined(PRESS_TOUR_BUILD)
+	Buttons[gr_screen.res][B_PILOT_CLONE_BUTTON].button.hide();
+	Buttons[gr_screen.res][B_PILOT_CONVERT_BUTTON].button.hide();	
+	Buttons[gr_screen.res][B_PILOT_CLONE_BUTTON].button.disable();	
+	Buttons[gr_screen.res][B_PILOT_CONVERT_BUTTON].button.disable();	
+#endif
+
+	// multiplayer beta build
+#ifdef MULTIPLAYER_BETA_BUILD
+	Buttons[gr_screen.res][B_PILOT_SINGLE_MODE_BUTTON].button.hide();
+	Buttons[gr_screen.res][B_PILOT_SINGLE_MODE_BUTTON].button.disable();
+#endif
+
+	// e3 build
+#if defined(E3_BUILD) || defined(PRESS_TOUR_BUILD)
+	Buttons[gr_screen.res][B_PILOT_MULTI_MODE_BUTTON].button.hide();
+	Buttons[gr_screen.res][B_PILOT_MULTI_MODE_BUTTON].button.disable();
+#endif
+	
+	// base the mode we're in (single or multi) on the status of the currently selected pilot
+#ifdef MULTIPLAYER_BETA_BUILD
+	barracks_init_player_stuff(1);
+#elif defined(E3_BUILD) || defined(PRESS_TOUR_BUILD)
+	barracks_init_player_stuff(0);
+#else
+	barracks_init_player_stuff(is_pilot_multi(Player));	
+#endif
+}
+
+// -----------------------------------------------------------------------------
+void pilot_manage_do()
+{
+	int k = Ui_window.process();
+
+	if ( k > 0 ) {
+		if ( help_overlay_active(BARRACKS_OVERLAY) ) {
+			help_overlay_set_state(BARRACKS_OVERLAY,0);
+			k = 0;
+		}
+	}
+
+	// pilot that mouse is over
+	int prospective_pilot = -1;
+	int i;
+
+	// Entering pilot callsign
+	if (Barracks_callsign_enter_mode) {
+		// set focus to inputbox
+		Inputbox.set_focus();
+
+		switch (k) {
+			case KEY_ESC:
+				// cancel create pilot
+				Num_pilots--;
+				for (i=0; i<Num_pilots; i++) {
+					strcpy(Pilots[i], Pilots[i + 1]);
+					Pilot_ranks[i] = Pilot_ranks[i + 1];
+				}
+
+				barracks_set_callsign_enter_mode(false);
+				break;
+
+			case KEY_ENTER: 
+				barracks_accept_new_pilot_callsign();
+				Inputbox.disable();
+				Inputbox.hide();
+				break;
+		} 
+	} else {
+		// not entering pilot callsign
+		switch (k) {
+			case KEY_ENTER:
+				if (barracks_new_pilot_selected()) {
+					gamesnd_play_iface(SND_GENERAL_FAIL);
+				} else {
+					gamesnd_play_iface(SND_USER_SELECT);
+				}
+				break;
+
+			case KEY_ESC:  // cancel
+				if (!help_overlay_active(BARRACKS_OVERLAY)) {
+					if (Num_pilots && !barracks_pilot_accepted()) {
+						gameseq_post_event(GS_EVENT_MAIN_MENU);
+					} else {
+						gamesnd_play_iface(SND_GENERAL_FAIL);
+					}
+				} else {
+					// kill the overlay
+					help_overlay_set_state(BARRACKS_OVERLAY,0);
+				}
+				break;
+
+			case KEY_TAB:  // switch mode (simgle/multi)
+#if defined(DEMO) || defined(OEM_BUILD) // not for FS2_DEMO
+	game_feature_not_in_demo_popup();
+#else
+				if (Player_sel_mode == PLAYER_SELECT_MODE_SINGLE) {
+					barracks_init_player_stuff(PLAYER_SELECT_MODE_MULTI);
+				} else {
+					barracks_init_player_stuff(PLAYER_SELECT_MODE_SINGLE);
+				}
+
+				gamesnd_play_iface(SND_USER_SELECT);
+#endif
+				break;
+
+			case KEY_F1:  // show help overlay
+				gamesnd_play_iface(SND_HELP_PRESSED);
+				break;
+
+			case KEY_F2:  // goto options screen
+				gamesnd_play_iface(SND_SWITCH_SCREENS);
+				gameseq_post_event(GS_EVENT_OPTIONS_MENU);
+				break;
+		}	// end switch
+
+		// process buttons
+		for (i=0; i<PM_NUM_BUTTONS; i++) {
+			if (Buttons[gr_screen.res][i].button.pressed()) {
+				pilot_manage_button_pressed(i);
+			}
+		}
+
+		// if mouse is over a pilot, find index into Pilots array
+		if (List_region.is_mouse_on()) {
+			int y;
+			List_region.get_mouse_pos(NULL, &y);
+			int pilot_index = List_scroll_offset + (y / gr_get_font_height());
+			if ((pilot_index >= 0) && (pilot_index < Num_pilots)) {
+				prospective_pilot = pilot_index;
+			}
+		}
+		
+		// if mouse clicked in list region, find index into Pilots array 
+		if (List_region.pressed()) {
+			if (prospective_pilot != -1) {
+				Selected_line = prospective_pilot;
+				gamesnd_play_iface(SND_USER_SELECT);
+			}
+		}
+	}
+
+	// check mouse over help
+	if (mouse_down(MOUSE_LEFT_BUTTON)) {
+		help_overlay_set_state(BARRACKS_OVERLAY, 0);
+	}
+
+	// do pilot pic stuff
+	/*if ((Pic_number >= 0) && (Pic_number < Num_pilot_images)) {
+		if (Pilot_images[Pic_number] == BARRACKS_IMAGE_NOT_LOADED) {  // haven't tried loading it yet
+			Pilot_images[Pic_number] = bm_load(Pilot_image_names[Pic_number]);
+			if (Pilot_images[Pic_number] >= 0) {
+				int w, h;
+
+				bm_get_info(Pilot_images[Pic_number], &w, &h, NULL);
+				// check for invalid pilot pic file
+				if ((w != PLAYER_PILOT_PIC_W) || (h != PLAYER_PILOT_PIC_H)) {
+					bm_unload(Pilot_images[Pic_number]);
+					Pilot_images[Pic_number] = -1;
+				}
+			}
+		}		
+	} else {
+		Pic_number = -1;
+	}*/
+
+	// do squad pic stuff
+	/*if ((Pic_squad_number >= 0) && (Pic_squad_number < Num_pilot_squad_images)) {
+		if (Pilot_squad_images[Pic_squad_number] == BARRACKS_IMAGE_NOT_LOADED) {  // haven't tried loading it yet
+			Pilot_squad_images[Pic_squad_number] = bm_load_duplicate(Pilot_squad_image_names[Pic_squad_number]);
+			if (Pilot_squad_images[Pic_squad_number] >= 0) {
+				int w, h;
+
+				bm_get_info(Pilot_squad_images[Pic_squad_number], &w, &h, NULL);
+				// check for invalid pilot pic file
+				if ((w != PLAYER_SQUAD_PIC_W) || (h != PLAYER_SQUAD_PIC_H)) {
+					bm_unload(Pilot_squad_images[Pic_squad_number]);
+					Pilot_squad_images[Pic_squad_number] = -1;
+				}
+			}
+		}
+	} else {
+		Pic_squad_number = -1;
+	}*/
+
+	// draw the background, etc
+	gr_reset_clip();	
+	GR_MAYBE_CLEAR_RES(Background_bitmap);
+	if (Background_bitmap >= 0) {
+		gr_set_bitmap(Background_bitmap);
+		gr_bitmap(0, 0);	
+	}		
+
+	// draw pilot image and clean up afterwards
+//	barracks_draw_pilot_pic();
+//	barracks_draw_squad_pic();
+
+	// draw the window	
+	Ui_window.draw();	
+
+	// light up the correct mode button (single or multi)	
+	if (Player_sel_mode == PLAYER_SELECT_MODE_SINGLE) {
+		Buttons[gr_screen.res][PM_SINGLE_MODE_BUTTON].button.draw_forced(2);
+	} else {
+		Buttons[gr_screen.res][PM_MULTI_MODE_BUTTON].button.draw_forced(2);
+	}	
+
+	// write out pilot call signs
+	barracks_display_pilot_callsigns(prospective_pilot);
+
+	// write out current pilot stats
+	//barracks_display_pilot_stats();
+
+	// blit help overlay if active
+	help_overlay_maybe_blit(BARRACKS_OVERLAY);	
+	
+	// flip the page
+	gr_flip();
+}
+
+// -----------------------------------------------------------------------------
+void pilot_manage_close()
+{
+	// destroy window
+	Ui_window.destroy();
+
+	// release background bitmap
+	if (Background_bitmap >= 0) {
+		bm_unload(Background_bitmap);
+	}	
+
+	// release rank pip bitmaps
+	int i;
+	for (i=0; i<Rank_pips_count; i++) {
+		bm_release(Rank_pips_bitmaps + i);
+	}	
+
+	// release pilot pic bitmaps
+	for (i=0; i<Num_pilot_images; i++) {
+		if (Pilot_images[i] >= 0) {
+			bm_unload(Pilot_images[i]);
+		}
+	}
+
+	// unload the overlay bitmap
+	help_overlay_unload(BARRACKS_OVERLAY);
+
+	game_flush();
+}
